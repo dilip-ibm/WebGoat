@@ -1,0 +1,124 @@
+{
+  "verification_report": {
+    "scan_date": "2026-05-18T12:43:00Z",
+    "total_patches_verified": 5,
+    "successful_fixes": 5,
+    "failed_fixes": 0,
+    "verification_method": "Manual code review and pattern analysis"
+  },
+  "verified_patches": [
+    {
+      "cve": "CVE-2015-6420",
+      "file": "target-repo/pom.xml",
+      "was_vulnerable_before": true,
+      "is_still_vulnerable": false,
+      "how_verified": "Verified that commons-collections dependency version was updated from 3.2.1 (vulnerable) to 3.2.2 (patched) on line 70. The vulnerable version 3.2.1 contained a remote code execution flaw via deserialization. Version 3.2.2 patches this vulnerability. Comment marker 'DEVSHERIFF-FIX: CVE-2015-6420 fixed on 2026-05-18' confirms the fix was applied.",
+      "confidence": "HIGH",
+      "original_vulnerability": "commons-collections 3.2.1 vulnerable to remote code execution via deserialization attacks",
+      "fix_applied": "Updated dependency version to 3.2.2",
+      "verification_details": {
+        "before_pattern": "commons-collections.version>3.2.1",
+        "after_pattern": "commons-collections.version>3.2.2",
+        "line_number": 70,
+        "fix_marker_present": true
+      }
+    },
+    {
+      "cve": "CUSTOM-SQL-007",
+      "file": "target-repo/src/main/java/org/owasp/webgoat/lessons/challenges/challenge5/Assignment5.java",
+      "was_vulnerable_before": true,
+      "is_still_vulnerable": false,
+      "how_verified": "Verified that the SQL query construction was changed from string concatenation to parameterized PreparedStatement. Original vulnerability at line 45 used string concatenation: 'select password from challenge_users where userid = \\'' + username_login + '\\' and password = \\'' + password_login + '\\''. Fixed code (lines 44-49) now uses PreparedStatement with placeholders: 'select password from challenge_users where userid = ? and password = ?' with statement.setString(1, username_login) and statement.setString(2, password_login). No string concatenation present in SQL query construction.",
+      "confidence": "HIGH",
+      "original_vulnerability": "User inputs 'username_login' and 'password_login' concatenated into SQL query enabling SQL injection",
+      "fix_applied": "Replaced string concatenation with parameterized PreparedStatement using ? placeholders and setString() methods",
+      "verification_details": {
+        "before_pattern": "String concatenation in SQL query",
+        "after_pattern": "PreparedStatement with parameterized queries",
+        "line_number": "44-49",
+        "fix_marker_present": true,
+        "uses_prepared_statement": true,
+        "uses_parameter_binding": true
+      }
+    },
+    {
+      "cve": "CUSTOM-SQL-001",
+      "file": "target-repo/src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5a.java",
+      "was_vulnerable_before": true,
+      "is_still_vulnerable": false,
+      "how_verified": "Verified that the SQL query construction was changed from string concatenation to parameterized PreparedStatement. Original vulnerability at line 48 used direct concatenation: 'SELECT * FROM user_data WHERE first_name = \\'John\\' and last_name = \\'' + accountName + '\\''. Fixed code (lines 47-51) now uses PreparedStatement with placeholder: 'SELECT * FROM user_data WHERE first_name = \\'John\\' and last_name = ?' with statement.setString(1, accountName). No string concatenation of user input into SQL query.",
+      "confidence": "HIGH",
+      "original_vulnerability": "User input 'accountName' directly concatenated into SQL query without sanitization",
+      "fix_applied": "Replaced string concatenation with parameterized PreparedStatement using ? placeholder and setString() method",
+      "verification_details": {
+        "before_pattern": "Direct string concatenation with accountName variable",
+        "after_pattern": "PreparedStatement with ? placeholder and parameter binding",
+        "line_number": "47-51",
+        "fix_marker_present": true,
+        "uses_prepared_statement": true,
+        "uses_parameter_binding": true
+      }
+    },
+    {
+      "cve": "CUSTOM-SQL-003",
+      "file": "target-repo/src/main/java/org/owasp/webgoat/lessons/sqlinjection/advanced/SqlInjectionLesson6a.java",
+      "was_vulnerable_before": true,
+      "is_still_vulnerable": false,
+      "how_verified": "Verified that the SQL query construction was changed from string concatenation to parameterized PreparedStatement and the method was refactored. Original vulnerability at line 54 used string concatenation: 'SELECT * FROM user_data WHERE last_name = \\'' + accountName + '\\''. Fixed code (lines 54-58) now uses PreparedStatement with placeholder: 'SELECT * FROM user_data WHERE last_name = ?' with statement.setString(1, accountName). The executeSqlInjection method was refactored to accept PreparedStatement instead of raw SQL string. No string concatenation of user input into SQL query.",
+      "confidence": "HIGH",
+      "original_vulnerability": "User input 'accountName' directly concatenated into SQL query without sanitization",
+      "fix_applied": "Replaced string concatenation with parameterized PreparedStatement and refactored executeSqlInjection method to accept PreparedStatement parameter",
+      "verification_details": {
+        "before_pattern": "String concatenation in SQL query",
+        "after_pattern": "PreparedStatement with ? placeholder and parameter binding",
+        "line_number": "54-58",
+        "fix_marker_present": true,
+        "uses_prepared_statement": true,
+        "uses_parameter_binding": true,
+        "method_refactored": true
+      }
+    },
+    {
+      "cve": "CUSTOM-SQL-004",
+      "file": "target-repo/src/main/java/org/owasp/webgoat/lessons/sqlinjection/advanced/SqlInjectionChallenge.java",
+      "was_vulnerable_before": true,
+      "is_still_vulnerable": false,
+      "how_verified": "Verified that the SQL query construction was changed from string concatenation to parameterized PreparedStatement. Original vulnerability at line 55 used string concatenation: 'select userid from sql_challenge_users where userid = \\'' + username + '\\''. Fixed code (lines 55-58) now uses PreparedStatement with placeholder: 'select userid from sql_challenge_users where userid = ?' with checkStatement.setString(1, username). No string concatenation of user input into SQL query. The INSERT statement also uses PreparedStatement with parameter binding (lines 63-68).",
+      "confidence": "HIGH",
+      "original_vulnerability": "User input 'username' directly concatenated into SQL query without sanitization",
+      "fix_applied": "Replaced string concatenation with parameterized PreparedStatement using ? placeholder and setString() method",
+      "verification_details": {
+        "before_pattern": "String concatenation with username variable",
+        "after_pattern": "PreparedStatement with ? placeholder and parameter binding",
+        "line_number": "55-58",
+        "fix_marker_present": true,
+        "uses_prepared_statement": true,
+        "uses_parameter_binding": true,
+        "additional_fixes": "INSERT statement also uses PreparedStatement (lines 63-68)"
+      }
+    }
+  ],
+  "summary": {
+    "all_fixes_successful": true,
+    "patch_failure_count": 0,
+    "high_confidence_fixes": 5,
+    "medium_confidence_fixes": 0,
+    "low_confidence_fixes": 0,
+    "notes": "All 5 auto-applied patches were successfully verified. Each SQL injection vulnerability was properly fixed by replacing string concatenation with parameterized PreparedStatements. The dependency vulnerability was fixed by updating to the patched version. All fixes include DEVSHERIFF-FIX comment markers for audit trail. No vulnerable patterns remain in the patched code."
+  },
+  "recommendations": {
+    "next_steps": [
+      "Run the security regression test suite in tests/ directory to validate fixes",
+      "Review the 6 vulnerabilities marked for human review in reports/human-review-checklist.md",
+      "Deploy to staging environment for integration testing",
+      "Conduct penetration testing to verify fixes in runtime environment",
+      "Update security documentation and incident response procedures"
+    ],
+    "monitoring": [
+      "Monitor application logs for SQL injection attempt patterns",
+      "Set up alerts for dependency vulnerabilities in CI/CD pipeline",
+      "Schedule quarterly security audits",
+      "Implement automated security scanning in pre-commit hooks"
+    ]
+  }
+}

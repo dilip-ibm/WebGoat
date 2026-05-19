@@ -1,0 +1,96 @@
+[
+  {
+    "cve": "CUSTOM-SQL-001",
+    "main_file": "target-repo/src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5a.java",
+    "other_files_affected": [],
+    "reason": "This is a self-contained lesson file with no dependencies on other files. The SQL injection vulnerability is isolated to this single endpoint.",
+    "safe_to_auto_fix": true
+  },
+  {
+    "cve": "CUSTOM-SQL-002",
+    "main_file": "target-repo/src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson8.java",
+    "other_files_affected": [
+      "target-repo/src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson9.java"
+    ],
+    "reason": "SqlInjectionLesson9 imports and uses the static method generateTable() from SqlInjectionLesson8. Fixing the SQL injection in Lesson8 may require updating the generateTable method signature or behavior, which would affect Lesson9.",
+    "safe_to_auto_fix": true
+  },
+  {
+    "cve": "CUSTOM-SQL-003",
+    "main_file": "target-repo/src/main/java/org/owasp/webgoat/lessons/sqlinjection/advanced/SqlInjectionLesson6a.java",
+    "other_files_affected": [],
+    "reason": "This is a self-contained lesson file with no dependencies on other files. The SQL injection vulnerability is isolated to this single endpoint.",
+    "safe_to_auto_fix": true
+  },
+  {
+    "cve": "CUSTOM-SQL-004",
+    "main_file": "target-repo/src/main/java/org/owasp/webgoat/lessons/sqlinjection/advanced/SqlInjectionChallenge.java",
+    "other_files_affected": [],
+    "reason": "This is a self-contained challenge file with no dependencies on other files. The SQL injection vulnerability is isolated to this single endpoint.",
+    "safe_to_auto_fix": true
+  },
+  {
+    "cve": "CUSTOM-SQL-005",
+    "main_file": "target-repo/src/main/java/org/owasp/webgoat/lessons/jwt/claimmisuse/JWTHeaderKIDEndpoint.java",
+    "other_files_affected": [
+      "target-repo/src/test/java/org/owasp/webgoat/lessons/jwt/claimmisuse/JWTHeaderKIDEndpointTest.java"
+    ],
+    "reason": "The test file JWTHeaderKIDEndpointTest tests the vulnerable endpoint. Fixing the SQL injection will require updating the test expectations to match the new secure behavior.",
+    "safe_to_auto_fix": true
+  },
+  {
+    "cve": "CUSTOM-SQL-006",
+    "main_file": "target-repo/src/main/java/org/owasp/webgoat/container/users/UserService.java",
+    "other_files_affected": [
+      "target-repo/src/main/java/org/owasp/webgoat/container/WebSecurityConfig.java",
+      "target-repo/src/main/java/org/owasp/webgoat/container/users/RegistrationController.java",
+      "target-repo/src/test/java/org/owasp/webgoat/container/users/UserServiceTest.java",
+      "target-repo/src/main/java/org/owasp/webgoat/container/lessons/LessonConnectionInvocationHandler.java"
+    ],
+    "reason": "UserService is a core service used by WebSecurityConfig, RegistrationController, and has unit tests. The createLessonsForUser method with SQL injection is called during user registration. LessonConnectionInvocationHandler also uses similar schema manipulation. Fixing this requires careful validation of usernames and may affect user registration flow and lesson initialization.",
+    "safe_to_auto_fix": true
+  },
+  {
+    "cve": "CUSTOM-SQL-007",
+    "main_file": "target-repo/src/main/java/org/owasp/webgoat/lessons/challenges/challenge5/Assignment5.java",
+    "other_files_affected": [],
+    "reason": "This is a self-contained challenge file with no dependencies on other files. The SQL injection vulnerability is isolated to this single endpoint.",
+    "safe_to_auto_fix": true
+  },
+  {
+    "cve": "CUSTOM-XSS-001",
+    "main_file": "target-repo/src/main/java/org/owasp/webgoat/lessons/xss/CrossSiteScriptingLesson5a.java",
+    "other_files_affected": [
+      "target-repo/src/it/java/org/owasp/webgoat/integration/XSSIntegrationTest.java"
+    ],
+    "reason": "The integration test XSSIntegrationTest specifically tests this XSS vulnerability by sending malicious payloads. Fixing the XSS vulnerability will require updating the test to verify proper sanitization instead of successful XSS execution.",
+    "safe_to_auto_fix": true
+  },
+  {
+    "cve": "CUSTOM-XSS-002",
+    "main_file": "target-repo/src/main/java/org/owasp/webgoat/lessons/xss/stored/StoredXssComments.java",
+    "other_files_affected": [
+      "target-repo/src/test/java/org/owasp/webgoat/lessons/xss/StoredXssCommentsTest.java",
+      "target-repo/src/main/java/org/owasp/webgoat/lessons/xss/stored/StoredCrossSiteScriptingVerifier.java"
+    ],
+    "reason": "StoredXssComments stores and retrieves user comments. The test file StoredXssCommentsTest tests this functionality. StoredCrossSiteScriptingVerifier is a follow-up assignment that verifies the XSS attack succeeded. Fixing the stored XSS will require updating both the storage mechanism and the verifier logic.",
+    "safe_to_auto_fix": true
+  },
+  {
+    "cve": "CVE-2015-6420",
+    "main_file": "target-repo/pom.xml",
+    "other_files_affected": [],
+    "reason": "commons-collections 3.2.1 is declared in pom.xml but no Java files in the codebase import or use it directly. This appears to be a transitive dependency. Upgrading the version in pom.xml should not affect any application code.",
+    "safe_to_auto_fix": true
+  },
+  {
+    "cve": "CVE-2021-29505",
+    "main_file": "target-repo/pom.xml",
+    "other_files_affected": [
+      "target-repo/src/main/java/org/owasp/webgoat/lessons/vulnerablecomponents/VulnerableComponentsLesson.java",
+      "target-repo/src/test/java/org/owasp/webgoat/lessons/vulnerablecomponents/VulnerableComponentsLessonTest.java"
+    ],
+    "reason": "XStream 1.4.5 is used in VulnerableComponentsLesson to demonstrate deserialization vulnerabilities. The lesson intentionally uses the vulnerable version. Upgrading XStream will break the lesson's educational purpose. The test file also depends on the vulnerable behavior.",
+    "safe_to_auto_fix": false
+  }
+]

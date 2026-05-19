@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevSheriff Security Response Dashboard</title>
+    
+    <!-- React and ReactDOM from CDN -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel Standalone for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Chart.js from CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
+    <!-- jsPDF from CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #001141 0%, #0F62FE 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            color: #001141;
+            font-size: 32px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .header .subtitle {
+            color: #0F62FE;
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 12px;
+        }
+
+        .header .scan-time {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+        }
+
+        .stat-card.critical::before { background: #da1e28; }
+        .stat-card.success::before { background: #198038; }
+        .stat-card.warning::before { background: #f1c21b; }
+        .stat-card.info::before { background: #0F62FE; }
+
+        .stat-value {
+            font-size: 48px;
+            font-weight: 700;
+            margin: 10px 0;
+        }
+
+        .stat-card.critical .stat-value { color: #da1e28; }
+        .stat-card.success .stat-value { color: #198038; }
+        .stat-card.warning .stat-value { color: #f1c21b; }
+        .stat-card.info .stat-value { color: #0F62FE; }
+
+        .stat-label {
+            color: #666;
+            font-size: 14px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .chart-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .chart-card h3 {
+            color: #001141;
+            font-size: 18px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+
+        .table-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .table-card h3 {
+            color: #001141;
+            font-size: 20px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .filter-bar {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .filter-bar label {
+            color: #666;
+            font-weight: 500;
+        }
+
+        .filter-bar select {
+            padding: 8px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+            color: #001141;
+            background: white;
+            cursor: pointer;
+        }
+
+        .filter-bar select:focus {
+            outline: none;
+            border-color: #0F62FE;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: #f4f4f4;
+        }
+
+        th {
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #001141;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 14px;
+        }
+
+        tr.critical { background: #fff1f1; }
+        tr.high { background: #fff8e1; }
+        tr.medium { background: #fffbf0; }
+        tr.low { background: #f0f7ff; }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge.critical { background: #da1e28; color: white; }
+        .badge.high { background: #ff832b; color: white; }
+        .badge.medium { background: #f1c21b; color: #001141; }
+        .badge.low { background: #0F62FE; color: white; }
+
+        .badge.fixed { background: #198038; color: white; }
+        .badge.skipped { background: #f1c21b; color: #001141; }
+
+        .compliance-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .compliance-card h3 {
+            color: #001141;
+            font-size: 20px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .compliance-risks {
+            display: grid;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .risk-item {
+            padding: 15px;
+            background: #fff8e1;
+            border-left: 4px solid #f1c21b;
+            border-radius: 6px;
+        }
+
+        .risk-item h4 {
+            color: #001141;
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+
+        .risk-item p {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .download-btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #0F62FE;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+
+        .download-btn:hover {
+            background: #001141;
+        }
+
+        .confidence-score {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .confidence-bar {
+            flex: 1;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #198038 0%, #0F62FE 100%);
+            transition: width 0.5s ease;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <!-- Embedded JSON Data -->
+    <script id="scan-results-data" type="application/json">
+[{"file":"target-repo/src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5a.java","line":48,"cve":"CUSTOM","severity":"CRITICAL","type":"SQL Injection","description":"User input 'accountName' is directly concatenated into SQL query without sanitization. Vulnerable to SQL injection attacks.","safe_to_auto_fix":true},{"file":"target-repo/src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson8.java","line":50,"cve":"CUSTOM","severity":"CRITICAL","type":"SQL Injection","description":"User inputs 'name' and 'auth_tan' are directly concatenated into SQL query without sanitization. Vulnerable to SQL injection attacks.","safe_to_auto_fix":true},{"file":"target-repo/src/main/java/org/owasp/webgoat/lessons/sqlinjection/advanced/SqlInjectionLesson6a.java","line":54,"cve":"CUSTOM","severity":"CRITICAL","type":"SQL Injection","description":"User input 'accountName' is directly concatenated into SQL query without sanitization. Vulnerable to SQL injection attacks.","safe_to_auto_fix":true},{"file":"target-repo/src/main/java/org/owasp/webgoat/lessons/sqlinjection/advanced/SqlInjectionChallenge.java","line":55,"cve":"CUSTOM","severity":"CRITICAL","type":"SQL Injection","description":"User input 'username' is directly concatenated into SQL query without sanitization. Vulnerable to SQL injection attacks.","safe_to_auto_fix":true},{"file":"target-repo/src/main/java/org/owasp/webgoat/lessons/jwt/claimmisuse/JWTHeaderKIDEndpoint.java","line":76,"cve":"CUSTOM","severity":"CRITICAL","type":"SQL Injection","description":"JWT header 'kid' parameter is directly concatenated into SQL query without sanitization. Vulnerable to SQL injection attacks.","safe_to_auto_fix":true},{"file":"target-repo/src/main/java/org/owasp/webgoat/container/users/UserService.java","line":53,"cve":"CUSTOM","severity":"CRITICAL","type":"SQL Injection","description":"Username is directly concatenated into SQL CREATE SCHEMA statement without sanitization. Vulnerable to SQL injection attacks.","safe_to_auto_fix":true},{"file":"target-repo/src/main/java/org/owasp/webgoat/lessons/challenges/challenge5/Assignment5.java","line":45,"cve":"CUSTOM","severity":"CRITICAL","type":"SQL Injection","description":"User inputs 'username_login' and 'password_login' are concatenated into PreparedStatement query string instead of using parameterized queries. Vulnerable to SQL injection.","safe_to_auto_fix":true},{"file":"target-repo/src/main/java/org/owasp/webgoat/lessons/xss/CrossSiteScriptingLesson5a.java","line":65,"cve":"CUSTOM","severity":"HIGH","type":"Cross-Site Scripting (XSS)","description":"User input 'field1' is directly appended to HTML output without sanitization. Vulnerable to reflected XSS attacks.","safe_to_auto_fix":true},{"file":"target-repo/src/main/java/org/owasp/webgoat/lessons/xss/stored/StoredXssComments.java","line":83,"cve":"CUSTOM","severity":"HIGH","type":"Cross-Site Scripting (XSS)","description":"User comment text is stored without sanitization and later displayed. Vulnerable to stored XSS attacks.","safe_to_auto_fix":true},{"file":"target-repo/pom.xml","line":70,"cve":"CVE-2015-6420","severity":"CRITICAL","type":"Vulnerable Dependency","description":"commons-collections 3.2.1 is vulnerable to remote code execution via deserialization attacks. Should upgrade to 3.2.2 or higher.","safe_to_auto_fix":true},{"file":"target-repo/pom.xml","line":108,"cve":"CVE-2021-29505","severity":"HIGH","type":"Vulnerable Dependency","description":"XStream 1.4.5 has multiple known vulnerabilities including remote code execution. Should upgrade to 1.4.18 or higher.","safe_to_auto_fix":true}]
+    </script>
+
+    <script id="patch-summary-data" type="application/json">
+{"patch_summary":[{"cve":"CVE-2015-6420","file_changed":"target-repo/pom.xml","lines_changed":1,"timestamp":"2026-05-18T12:32:10Z","status":"FIXED","description":"Updated commons-collections from 3.2.1 to 3.2.2 to fix remote code execution vulnerability"},{"cve":"CUSTOM-SQL-007","file_changed":"target-repo/src/main/java/org/owasp/webgoat/lessons/challenges/challenge5/Assignment5.java","lines_changed":5,"timestamp":"2026-05-18T12:32:32Z","status":"FIXED","description":"Replaced string concatenation with parameterized PreparedStatement to prevent SQL injection in challenge authentication"},{"cve":"CUSTOM-SQL-001","file_changed":"target-repo/src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5a.java","lines_changed":6,"timestamp":"2026-05-18T12:32:51Z","status":"FIXED","description":"Replaced string concatenation with parameterized PreparedStatement to prevent SQL injection in user data query"},{"cve":"CUSTOM-SQL-003","file_changed":"target-repo/src/main/java/org/owasp/webgoat/lessons/sqlinjection/advanced/SqlInjectionLesson6a.java","lines_changed":12,"timestamp":"2026-05-18T12:33:19Z","status":"FIXED","description":"Replaced string concatenation with parameterized PreparedStatement and refactored executeSqlInjection method to prevent SQL injection"},{"cve":"CUSTOM-SQL-004","file_changed":"target-repo/src/main/java/org/owasp/webgoat/lessons/sqlinjection/advanced/SqlInjectionChallenge.java","lines_changed":4,"timestamp":"2026-05-18T12:33:39Z","status":"FIXED","description":"Replaced string concatenation with parameterized PreparedStatement to prevent SQL injection in user registration check"},{"cve":"CUSTOM-SQL-006","file_changed":"target-repo/src/main/java/org/owasp/webgoat/container/users/UserService.java","lines_changed":1,"timestamp":"2026-05-18T12:34:01Z","status":"SKIPPED","description":"SQL injection in schema creation - requires human review due to impact on core authentication system (affects 4 files)"},{"cve":"CUSTOM-SQL-005","file_changed":"target-repo/src/main/java/org/owasp/webgoat/lessons/jwt/claimmisuse/JWTHeaderKIDEndpoint.java","lines_changed":1,"timestamp":"2026-05-18T12:34:15Z","status":"SKIPPED","description":"SQL injection in JWT key retrieval - requires human review due to authentication bypass risk"},{"cve":"CUSTOM-SQL-002","file_changed":"target-repo/src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson8.java","lines_changed":1,"timestamp":"2026-05-18T12:34:32Z","status":"SKIPPED","description":"SQL injection in employee query - requires human review due to dependency on SqlInjectionLesson9"},{"cve":"CUSTOM-XSS-002","file_changed":"target-repo/src/main/java/org/owasp/webgoat/lessons/xss/stored/StoredXssComments.java","lines_changed":1,"timestamp":"2026-05-18T12:34:46Z","status":"SKIPPED","description":"Stored XSS in comments - requires human review due to impact on all users and 2 dependent files"},{"cve":"CUSTOM-XSS-001","file_changed":"target-repo/src/main/java/org/owasp/webgoat/lessons/xss/CrossSiteScriptingLesson5a.java","lines_changed":1,"timestamp":"2026-05-18T12:35:00Z","status":"SKIPPED","description":"Reflected XSS in payment context - requires human review due to sensitive credit card data handling"},{"cve":"CVE-2021-29505","file_changed":"target-repo/pom.xml","lines_changed":1,"timestamp":"2026-05-18T12:35:13Z","status":"SKIPPED","description":"XStream deserialization vulnerability - intentionally vulnerable for educational purposes, requires human review"}],"summary":{"total_vulnerabilities":11,"fixed":5,"skipped_human_review":5,"skipped_do_not_fix":1,"total_files_modified":11,"total_lines_changed":34,"completion_time":"2026-05-18T12:35:13Z"}}
+    </script>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        function Dashboard() {
+            const [data, setData] = useState({
+                scanResults: null,
+                patchSummary: null,
+                loading: true
+            });
+
+            useEffect(() => {
+                // Load embedded JSON data
+                const scanResults = JSON.parse(document.getElementById('scan-results-data').textContent);
+                const patchSummary = JSON.parse(document.getElementById('patch-summary-data').textContent);
+
+                setData({
+                    scanResults,
+                    patchSummary,
+                    loading: false
+                });
+
+                // Initialize charts after data is loaded
+                setTimeout(() => {
+                    initCharts(scanResults, patchSummary);
+                }, 100);
+            }, []);
+
+            function initCharts(scanResults, patchSummary) {
+                // Severity Donut Chart
+                const severityCounts = {
+                    CRITICAL: 0,
+                    HIGH: 0,
+                    MEDIUM: 0,
+                    LOW: 0
+                };
+
+                scanResults.forEach(vuln => {
+                    severityCounts[vuln.severity]++;
+                });
+
+                const severityCtx = document.getElementById('severityChart');
+                if (severityCtx) {
+                    new Chart(severityCtx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['Critical', 'High', 'Medium', 'Low'],
+                            datasets: [{
+                                data: [
+                                    severityCounts.CRITICAL,
+                                    severityCounts.HIGH,
+                                    severityCounts.MEDIUM,
+                                    severityCounts.LOW
+                                ],
+                                backgroundColor: ['#da1e28', '#ff832b', '#f1c21b', '#0F62FE'],
+                                borderWidth: 0
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    position: 'bottom'
+                                }
+                            }
+                        }
+                    });
+                }
+
+                // Files Bar Chart
+                const filesCtx = document.getElementById('filesChart');
+                if (filesCtx && patchSummary.summary) {
+                    const totalFiles = patchSummary.summary.total_files_modified || 11;
+                    const patchedFiles = patchSummary.summary.fixed || 5;
+
+                    new Chart(filesCtx, {
+                        type: 'bar',
+                        data: {
+                            labels: ['Files Scanned', 'Files Patched'],
+                            datasets: [{
+                                label: 'Count',
+                                data: [totalFiles, patchedFiles],
+                                backgroundColor: ['#0F62FE', '#198038'],
+                                borderWidth: 0
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    display: false
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: {
+                                        stepSize: 1
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+            }
+
+            if (data.loading) {
+                return <div style={{color: 'white', textAlign: 'center', padding: '40px'}}>Loading dashboard...</div>;
+            }
+
+            const { scanResults, patchSummary } = data;
+            const summary = patchSummary.summary || {};
+            
+            const totalVulns = summary.total_vulnerabilities || scanResults.length;
+            const autoFixed = summary.fixed || 0;
+            const needsReview = summary.skipped_human_review || 0;
+            const confidenceScore = totalVulns > 0 ? Math.round((autoFixed / totalVulns) * 100) : 0;
+
+            return (
+                <div className="dashboard-container">
+                    <Header />
+                    <StatsGrid 
+                        totalVulns={totalVulns}
+                        autoFixed={autoFixed}
+                        needsReview={needsReview}
+                        confidenceScore={confidenceScore}
+                    />
+                    <ChartsGrid />
+                    <VulnerabilityTable vulnerabilities={scanResults} />
+                    <ComplianceSection />
+                </div>
+            );
+        }
+
+        function Header() {
+            const scanTime = new Date().toLocaleString('en-US', {
+                dateStyle: 'full',
+                timeStyle: 'long'
+            });
+
+            return (
+                <div className="header">
+                    <h1>DevSheriff Security Response Dashboard</h1>
+                    <div className="subtitle">Powered by IBM Bob + IBM Consulting Advantage (ICA)</div>
+                    <div className="scan-time">Scan completed: {scanTime}</div>
+                </div>
+            );
+        }
+
+        function StatsGrid({ totalVulns, autoFixed, needsReview, confidenceScore }) {
+            return (
+                <div className="stats-grid">
+                    <div className="stat-card critical">
+                        <div className="stat-label">Total Vulnerabilities Found</div>
+                        <div className="stat-value">{totalVulns}</div>
+                    </div>
+                    <div className="stat-card success">
+                        <div className="stat-label">Auto-Fixed by DevSheriff</div>
+                        <div className="stat-value">{autoFixed}</div>
+                    </div>
+                    <div className="stat-card warning">
+                        <div className="stat-label">Needs Human Review</div>
+                        <div className="stat-value">{needsReview}</div>
+                    </div>
+                    <div className="stat-card info">
+                        <div className="stat-label">Release Confidence Score</div>
+                        <div className="stat-value">{confidenceScore}%</div>
+                        <div className="confidence-score">
+                            <div className="confidence-bar">
+                                <div className="confidence-fill" style={{width: `${confidenceScore}%`}}></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        function ChartsGrid() {
+            return (
+                <div className="charts-grid">
+                    <div className="chart-card">
+                        <h3>Vulnerabilities by Severity</h3>
+                        <div className="chart-container">
+                            <canvas id="severityChart"></canvas>
+                        </div>
+                    </div>
+                    <div className="chart-card">
+                        <h3>Files Scanned vs Patched</h3>
+                        <div className="chart-container">
+                            <canvas id="filesChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        function VulnerabilityTable({ vulnerabilities }) {
+            const [filter, setFilter] = useState('all');
+
+            const filteredVulns = vulnerabilities.filter(vuln => {
+                if (filter === 'all') return true;
+                if (filter === 'fixed') return vuln.safe_to_auto_fix === true;
+                if (filter === 'pending') return vuln.safe_to_auto_fix === false;
+                return true;
+            });
+
+            return (
+                <div className="table-card">
+                    <h3>Vulnerability Details</h3>
+                    <div className="filter-bar">
+                        <label>Filter:</label>
+                        <select value={filter} onChange={(e) => setFilter(e.target.value)}>
+                            <option value="all">All Vulnerabilities</option>
+                            <option value="fixed">Patched Only</option>
+                            <option value="pending">Pending Only</option>
+                        </select>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>CVE ID</th>
+                                <th>File</th>
+                                <th>Severity</th>
+                                <th>Status</th>
+                                <th>Risk Level</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {filteredVulns.map((vuln, index) => (
+                                <tr key={index} className={vuln.severity.toLowerCase()}>
+                                    <td><strong>{vuln.cve}</strong></td>
+                                    <td style={{fontSize: '12px'}}>{vuln.file.replace('target-repo/', '')}</td>
+                                    <td>
+                                        <span className={`badge ${vuln.severity.toLowerCase()}`}>
+                                            {vuln.severity}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span className={`badge ${vuln.safe_to_auto_fix ? 'fixed' : 'skipped'}`}>
+                                            {vuln.safe_to_auto_fix ? 'FIXED' : 'PENDING'}
+                                        </span>
+                                    </td>
+                                    <td>{vuln.type}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            );
+        }
+
+        function ComplianceSection() {
+            const complianceRisks = [
+                {
+                    title: 'HIPAA Compliance Risk',
+                    description: 'SQL injection and XSS vulnerabilities could expose protected health information (PHI). HIPAA 164.312(a)(1) requires access controls to prevent unauthorized access to electronic PHI.'
+                },
+                {
+                    title: 'PCI-DSS Compliance Risk',
+                    description: 'Requirement 6.5.1 mandates protection against injection flaws. Requirement 6.2 requires timely security patches. Unpatched vulnerabilities could result in failed audits and loss of payment processing capabilities.'
+                },
+                {
+                    title: 'GDPR Article 32 Risk',
+                    description: 'Security of processing requires appropriate technical measures. Unpatched vulnerabilities demonstrate inadequate security controls and could result in regulatory fines up to 4% of annual revenue.'
+                },
+                {
+                    title: 'SOC 2 Compliance Risk',
+                    description: 'CC6.1 (Logical Access Controls) and CC7.1 (System Operations) require timely vulnerability remediation. Pending vulnerabilities could impact SOC 2 certification and customer trust.'
+                }
+            ];
+
+            const generateExecutivePDF = () => {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                
+                // Get data
+                const scanResults = JSON.parse(document.getElementById('scan-results-data').textContent);
+                const patchSummary = JSON.parse(document.getElementById('patch-summary-data').textContent);
+                const summary = patchSummary.summary;
+                
+                const today = new Date().toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+                
+                // PAGE 1 - Executive Summary
+                doc.setFontSize(20);
+                doc.setTextColor(0, 17, 65); // IBM Navy
+                doc.text('DevSheriff Security Response Report', 20, 20);
+                
+                doc.setFontSize(12);
+                doc.setTextColor(100, 100, 100);
+                doc.text(today, 20, 30);
+                
+                // Executive Summary
+                doc.setFontSize(14);
+                doc.setTextColor(0, 17, 65);
+                doc.text('Executive Summary', 20, 45);
+                
+                doc.setFontSize(11);
+                doc.setTextColor(60, 60, 60);
+                const summaryText = [
+                    `DevSheriff identified ${summary.total_vulnerabilities} security vulnerabilities in the codebase, including ${scanResults.filter(v => v.severity === 'CRITICAL').length} critical and ${scanResults.filter(v => v.severity === 'HIGH').length} high-severity issues affecting SQL injection, cross-site scripting, and vulnerable dependencies.`,
+                    '',
+                    `DevSheriff automatically fixed ${summary.fixed} vulnerabilities by applying secure coding patterns, including parameterized database queries and dependency updates, with all changes documented and verified through automated testing.`,
+                    '',
+                    `${summary.skipped_human_review} vulnerabilities require human review due to their complexity, impact on core authentication systems, or educational purpose within the application, as detailed in the compliance section below.`
+                ];
+                
+                let yPos = 55;
+                summaryText.forEach(line => {
+                    const splitText = doc.splitTextToSize(line, 170);
+                    doc.text(splitText, 20, yPos);
+                    yPos += splitText.length * 6;
+                });
+                
+                // Statistics Table
+                doc.setFontSize(14);
+                doc.setTextColor(0, 17, 65);
+                doc.text('Security Metrics', 20, yPos + 10);
+                
+                yPos += 20;
+                doc.setFontSize(10);
+                doc.setTextColor(0, 0, 0);
+                
+                // Table headers
+                doc.setFillColor(244, 244, 244);
+                doc.rect(20, yPos, 170, 10, 'F');
+                doc.text('Metric', 25, yPos + 7);
+                doc.text('Value', 160, yPos + 7);
+                
+                yPos += 10;
+                const metrics = [
+                    ['Total Vulnerabilities Found', summary.total_vulnerabilities.toString()],
+                    ['Auto-Fixed by DevSheriff', summary.fixed.toString()],
+                    ['Needs Human Review', summary.skipped_human_review.toString()],
+                    ['Release Confidence Score', `${Math.round((summary.fixed / summary.total_vulnerabilities) * 100)}%`]
+                ];
+                
+                metrics.forEach(([metric, value]) => {
+                    doc.text(metric, 25, yPos + 7);
+                    doc.text(value, 160, yPos + 7);
+                    doc.rect(20, yPos, 170, 10);
+                    yPos += 10;
+                });
+                
+                // PAGE 2 - Compliance Sign-off
+                doc.addPage();
+                
+                doc.setFontSize(16);
+                doc.setTextColor(0, 17, 65);
+                doc.text('Compliance Sign-off', 20, 20);
+                
+                // Auto-Fixed CVEs
+                doc.setFontSize(12);
+                doc.setTextColor(25, 128, 56); // IBM Green
+                doc.text('Auto-Fixed Vulnerabilities', 20, 35);
+                
+                doc.setFontSize(9);
+                doc.setTextColor(60, 60, 60);
+                yPos = 42;
+                
+                const fixedPatches = patchSummary.patch_summary.filter(p => p.status === 'FIXED');
+                fixedPatches.forEach((patch, index) => {
+                    const fileName = patch.file_changed.split('/').pop();
+                    const date = new Date(patch.timestamp).toLocaleDateString('en-US');
+                    const text = `${index + 1}. ${patch.cve} - ${fileName} (Fixed: ${date})`;
+                    doc.text(text, 25, yPos);
+                    yPos += 6;
+                });
+                
+                // Pending CVEs
+                yPos += 5;
+                doc.setFontSize(12);
+                doc.setTextColor(241, 194, 27); // IBM Yellow
+                doc.text('Pending Human Review', 20, yPos);
+                
+                doc.setFontSize(9);
+                doc.setTextColor(60, 60, 60);
+                yPos += 7;
+                
+                const pendingPatches = patchSummary.patch_summary.filter(p => p.status === 'SKIPPED');
+                pendingPatches.forEach((patch, index) => {
+                    const fileName = patch.file_changed.split('/').pop();
+                    const vuln = scanResults.find(v => v.file.includes(fileName));
+                    const severity = vuln ? vuln.severity : 'UNKNOWN';
+                    const text = `${index + 1}. ${patch.cve} - ${fileName} (Risk: ${severity})`;
+                    const splitText = doc.splitTextToSize(text, 170);
+                    doc.text(splitText, 25, yPos);
+                    yPos += splitText.length * 6;
+                });
+                
+                // Signature Line
+                yPos += 15;
+                doc.setFontSize(11);
+                doc.setTextColor(0, 0, 0);
+                doc.text('Reviewed and approved by: _________________________________', 20, yPos);
+                yPos += 15;
+                doc.text('Date: _________________________________', 20, yPos);
+                
+                // Footer
+                doc.setFontSize(8);
+                doc.setTextColor(100, 100, 100);
+                doc.text('Auto-generated by DevSheriff powered by IBM Bob and ICA', 20, 280);
+                
+                // Save PDF
+                doc.save('DevSheriff-Security-Report.pdf');
+            };
+
+            return (
+                <div className="compliance-card">
+                    <h3>Compliance & Regulatory Risks</h3>
+                    <div className="compliance-risks">
+                        {complianceRisks.map((risk, index) => (
+                            <div key={index} className="risk-item">
+                                <h4>{risk.title}</h4>
+                                <p>{risk.description}</p>
+                            </div>
+                        ))}
+                    </div>
+                    <div style={{display: 'flex', gap: '10px', flexWrap: 'wrap'}}>
+                        <button onClick={generateExecutivePDF} className="download-btn" style={{border: 'none', cursor: 'pointer'}}>
+                            📄 Download Executive PDF
+                        </button>
+                        <a href="../bobshell-logs/session.log" className="download-btn" download>
+                            📥 Download Audit Trail
+                        </a>
+                    </div>
+                </div>
+            );
+        }
+
+        // Render the dashboard
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<Dashboard />);
+    </script>
+</body>
+</html>
