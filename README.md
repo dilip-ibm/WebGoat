@@ -1,6 +1,6 @@
 # DevSheriff — Autonomous Security Incident Response Agent
 
-> **Winner of IBM Bob Hackathon 2026** | Powered by IBM Bob + IBM Consulting Advantage (ICA)
+> **IBM Bob Hackathon 2026** | Powered by IBM Bob + IBM Consulting Advantage (ICA)
 
 ![DevSheriff Banner](https://img.shields.io/badge/Security-Autonomous-blue?style=for-the-badge) ![IBM Bob](https://img.shields.io/badge/IBM-Bob-0F62FE?style=for-the-badge) ![Status](https://img.shields.io/badge/Status-Production%20Ready-success?style=for-the-badge)
 
