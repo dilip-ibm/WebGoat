@@ -1,0 +1,126 @@
+{
+  "remediation_plan": [
+    {
+      "priority": 1,
+      "cve": "CVE-2015-6420",
+      "file": "target-repo/pom.xml",
+      "what_to_change": "Update commons-collections version from 3.2.1 to 3.2.2 or higher on line 70. Change <commons-collections.version>3.2.1</commons-collections.version> to <commons-collections.version>3.2.2</commons-collections.version>",
+      "fix_type": "update_dependency",
+      "risk": "LOW",
+      "approval": "auto_fix",
+      "how_to_test": "Run 'mvn dependency:tree' to verify the updated version is used. Run all unit tests with 'mvn test' to ensure no breaking changes.",
+      "compliance_risk": "GDPR Article 32 (Security of Processing), PCI-DSS Requirement 6.2 (Security Patches), SOC 2 CC6.1 (Logical Access Controls). Remote code execution vulnerability could lead to complete system compromise and data breach."
+    },
+    {
+      "priority": 2,
+      "cve": "CUSTOM-SQL-006",
+      "file": "target-repo/src/main/java/org/owasp/webgoat/container/users/UserService.java",
+      "what_to_change": "On line 53, replace direct string concatenation with parameterized query or input validation. Change 'jdbcTemplate.execute(\"CREATE SCHEMA \\\"\" + webGoatUser.getUsername() + \"\\\" authorization dba\")' to validate username against alphanumeric pattern first, or use PreparedStatement with proper escaping.",
+      "fix_type": "replace_code",
+      "risk": "HIGH",
+      "approval": "needs_human_review",
+      "how_to_test": "Attempt user registration with SQL injection payloads like 'admin\"; DROP SCHEMA test; --'. Verify registration fails with validation error. Test legitimate usernames still work. Run integration tests for user registration flow.",
+      "compliance_risk": "OWASP Top 10 A03:2021 (Injection), PCI-DSS Requirement 6.5.1 (Injection Flaws), HIPAA 164.312(a)(1) (Access Control). SQL injection in user service could allow attackers to manipulate database schemas, escalate privileges, or access other users' data."
+    },
+    {
+      "priority": 3,
+      "cve": "CUSTOM-SQL-005",
+      "file": "target-repo/src/main/java/org/owasp/webgoat/lessons/jwt/claimmisuse/JWTHeaderKIDEndpoint.java",
+      "what_to_change": "On line 76, replace string concatenation in SQL query with PreparedStatement. Change 'connection.createStatement().executeQuery(\"SELECT key FROM jwt_keys WHERE id = '\" + kid + \"'\")' to use PreparedStatement with parameterized query: 'PreparedStatement ps = connection.prepareStatement(\"SELECT key FROM jwt_keys WHERE id = ?\"); ps.setString(1, kid); ResultSet rs = ps.executeQuery();'",
+      "fix_type": "replace_code",
+      "risk": "HIGH",
+      "approval": "needs_human_review",
+      "how_to_test": "Send JWT tokens with malicious 'kid' header values like \"1' OR '1'='1\". Verify the query returns only the intended key or fails safely. Update JWTHeaderKIDEndpointTest to test both valid and malicious inputs.",
+      "compliance_risk": "OWASP Top 10 A03:2021 (Injection), CWE-89 (SQL Injection), PCI-DSS 6.5.1. JWT key retrieval vulnerability could allow attackers to forge tokens and bypass authentication entirely."
+    },
+    {
+      "priority": 4,
+      "cve": "CUSTOM-SQL-007",
+      "file": "target-repo/src/main/java/org/owasp/webgoat/lessons/challenges/challenge5/Assignment5.java",
+      "what_to_change": "On lines 45-49, fix the PreparedStatement misuse. Instead of concatenating user inputs into the query string, use proper parameterized queries: 'connection.prepareStatement(\"select password from challenge_users where userid = ? and password = ?\"); statement.setString(1, username_login); statement.setString(2, password_login);'",
+      "fix_type": "replace_code",
+      "risk": "MEDIUM",
+      "approval": "auto_fix",
+      "how_to_test": "Attempt login with SQL injection payloads like username=\"admin' OR '1'='1\" and password=\"anything\". Verify login fails. Test legitimate credentials still work correctly.",
+      "compliance_risk": "OWASP Top 10 A03:2021 (Injection), NIST 800-53 SI-10 (Information Input Validation). Authentication bypass via SQL injection could allow unauthorized access to challenge accounts."
+    },
+    {
+      "priority": 5,
+      "cve": "CUSTOM-SQL-001",
+      "file": "target-repo/src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5a.java",
+      "what_to_change": "On line 48, replace string concatenation with PreparedStatement. Change 'query = \"SELECT * FROM user_data WHERE first_name = 'John' and last_name = '\" + accountName + \"'\"' to use PreparedStatement: 'PreparedStatement ps = connection.prepareStatement(\"SELECT * FROM user_data WHERE first_name = 'John' and last_name = ?\"); ps.setString(1, accountName);'",
+      "fix_type": "replace_code",
+      "risk": "MEDIUM",
+      "approval": "auto_fix",
+      "how_to_test": "Submit SQL injection payloads through the lesson interface. Verify the query safely handles malicious input and returns only legitimate results. Ensure the lesson still demonstrates the vulnerability concept if that's the educational goal.",
+      "compliance_risk": "OWASP Top 10 A03:2021 (Injection), CWE-89. Educational context but demonstrates insecure coding practices that could be replicated in production code."
+    },
+    {
+      "priority": 6,
+      "cve": "CUSTOM-SQL-002",
+      "file": "target-repo/src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson8.java",
+      "what_to_change": "On lines 50-54, replace string concatenation with PreparedStatement. Change the query construction to: 'PreparedStatement ps = connection.prepareStatement(\"SELECT * FROM employees WHERE last_name = ? AND auth_tan = ?\"); ps.setString(1, name); ps.setString(2, auth_tan); ResultSet results = ps.executeQuery();'",
+      "fix_type": "replace_code",
+      "risk": "MEDIUM",
+      "approval": "needs_human_review",
+      "how_to_test": "Test with SQL injection payloads in both name and auth_tan parameters. Verify queries execute safely. Check that SqlInjectionLesson9 which uses generateTable() method still functions correctly after changes.",
+      "compliance_risk": "OWASP Top 10 A03:2021 (Injection), PCI-DSS 6.5.1. Employee data access vulnerability could expose sensitive authentication tokens and personal information."
+    },
+    {
+      "priority": 7,
+      "cve": "CUSTOM-SQL-003",
+      "file": "target-repo/src/main/java/org/owasp/webgoat/lessons/sqlinjection/advanced/SqlInjectionLesson6a.java",
+      "what_to_change": "On line 54, replace string concatenation with PreparedStatement. Change 'query = \"SELECT * FROM user_data WHERE last_name = '\" + accountName + \"'\"' to: 'PreparedStatement ps = connection.prepareStatement(\"SELECT * FROM user_data WHERE last_name = ?\"); ps.setString(1, accountName); ResultSet results = ps.executeQuery();'",
+      "fix_type": "replace_code",
+      "risk": "MEDIUM",
+      "approval": "auto_fix",
+      "how_to_test": "Submit UNION-based SQL injection attacks through the lesson interface. Verify the parameterized query prevents data exfiltration. Ensure lesson objectives are still met if this is an intentional vulnerability demonstration.",
+      "compliance_risk": "OWASP Top 10 A03:2021 (Injection), CWE-89. Advanced SQL injection could allow complete database enumeration and data theft."
+    },
+    {
+      "priority": 8,
+      "cve": "CUSTOM-SQL-004",
+      "file": "target-repo/src/main/java/org/owasp/webgoat/lessons/sqlinjection/advanced/SqlInjectionChallenge.java",
+      "what_to_change": "On line 55, replace string concatenation with PreparedStatement. Change 'String checkUserQuery = \"select userid from sql_challenge_users where userid = '\" + username + \"'\"' to: 'PreparedStatement ps = connection.prepareStatement(\"select userid from sql_challenge_users where userid = ?\"); ps.setString(1, username); ResultSet resultSet = ps.executeQuery();'",
+      "fix_type": "replace_code",
+      "risk": "MEDIUM",
+      "approval": "auto_fix",
+      "how_to_test": "Attempt user registration with SQL injection payloads. Verify the check properly validates existing users without executing malicious SQL. Test that legitimate user registration still works.",
+      "compliance_risk": "OWASP Top 10 A03:2021 (Injection), NIST 800-53 SI-10. User registration bypass could allow account enumeration and unauthorized account creation."
+    },
+    {
+      "priority": 9,
+      "cve": "CUSTOM-XSS-002",
+      "file": "target-repo/src/main/java/org/owasp/webgoat/lessons/xss/stored/StoredXssComments.java",
+      "what_to_change": "On line 83, sanitize user input before storing. Add HTML encoding: 'import org.springframework.web.util.HtmlUtils; ... comment.setText(HtmlUtils.htmlEscape(comment.getText())); comments.add(comment);' This encodes special characters like <, >, &, \", ' to prevent script execution.",
+      "fix_type": "replace_code",
+      "risk": "HIGH",
+      "approval": "needs_human_review",
+      "how_to_test": "Submit comments containing <script>alert('XSS')</script>. Verify the script is displayed as text, not executed. Update StoredXssCommentsTest and StoredCrossSiteScriptingVerifier to test sanitization. Check that legitimate HTML entities in comments are properly handled.",
+      "compliance_risk": "OWASP Top 10 A03:2021 (Injection - XSS), PCI-DSS 6.5.7 (Cross-site Scripting), GDPR Article 32. Stored XSS could allow attackers to steal session tokens, perform actions as other users, or inject malware affecting all users viewing the comments."
+    },
+    {
+      "priority": 10,
+      "cve": "CUSTOM-XSS-001",
+      "file": "target-repo/src/main/java/org/owasp/webgoat/lessons/xss/CrossSiteScriptingLesson5a.java",
+      "what_to_change": "On line 65, sanitize user input before appending to HTML output. Change 'cart.append(\"<p>We have charged credit card:\" + field1 + \"<br />\")' to: 'import org.springframework.web.util.HtmlUtils; ... cart.append(\"<p>We have charged credit card:\" + HtmlUtils.htmlEscape(field1) + \"<br />\");'",
+      "fix_type": "replace_code",
+      "risk": "HIGH",
+      "approval": "needs_human_review",
+      "how_to_test": "Submit XSS payloads in field1 parameter like <script>alert('XSS')</script>. Verify the output is HTML-encoded and not executed. Update XSSIntegrationTest to verify sanitization works. Ensure the lesson can still demonstrate XSS concepts if that's the educational goal.",
+      "compliance_risk": "OWASP Top 10 A03:2021 (Injection - XSS), PCI-DSS 6.5.7, SOC 2 CC6.1. Reflected XSS in payment context could allow attackers to steal credit card information or session tokens through phishing attacks."
+    },
+    {
+      "priority": 11,
+      "cve": "CVE-2021-29505",
+      "file": "target-repo/pom.xml",
+      "what_to_change": "Update XStream version from 1.4.5 to 1.4.20 or higher on line 108. Change <xstream.version>1.4.5</xstream.version> to <xstream.version>1.4.20</xstream.version>. NOTE: This is intentionally vulnerable for educational purposes in VulnerableComponentsLesson.",
+      "fix_type": "update_dependency",
+      "risk": "HIGH",
+      "approval": "do_not_auto_fix",
+      "how_to_test": "After upgrade, verify VulnerableComponentsLesson still demonstrates the vulnerability concept. Run VulnerableComponentsLessonTest. May need to update lesson content to use a different vulnerable component or add security configuration to XStream to maintain educational value while using newer version.",
+      "compliance_risk": "OWASP Top 10 A08:2021 (Software and Data Integrity Failures), CWE-502 (Deserialization of Untrusted Data). However, this is an intentional vulnerability in a training application. In production context, this would violate PCI-DSS 6.2, HIPAA 164.308(a)(5)(ii)(B), and SOC 2 CC7.1 requiring timely security patches."
+    }
+  ],
+  "summary": "This WebGoat training application contains 11 security vulnerabilities: 7 SQL injections, 2 XSS flaws, and 2 outdated dependencies with known CVEs. Most critical is the commons-collections RCE vulnerability (CVE-2015-6420) which should be patched immediately, followed by the SQL injection in UserService that affects core authentication, while the XStream vulnerability should remain unfixed as it serves an educational purpose in demonstrating deserialization attacks."
+}

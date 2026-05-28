@@ -1,0 +1,101 @@
+[
+  {
+    "file": "target-repo/src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5a.java",
+    "line": 48,
+    "cve": "CUSTOM",
+    "severity": "CRITICAL",
+    "type": "SQL Injection",
+    "description": "User input 'accountName' is directly concatenated into SQL query without sanitization. Vulnerable to SQL injection attacks.",
+    "safe_to_auto_fix": true
+  },
+  {
+    "file": "target-repo/src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson8.java",
+    "line": 50,
+    "cve": "CUSTOM",
+    "severity": "CRITICAL",
+    "type": "SQL Injection",
+    "description": "User inputs 'name' and 'auth_tan' are directly concatenated into SQL query without sanitization. Vulnerable to SQL injection attacks.",
+    "safe_to_auto_fix": true
+  },
+  {
+    "file": "target-repo/src/main/java/org/owasp/webgoat/lessons/sqlinjection/advanced/SqlInjectionLesson6a.java",
+    "line": 54,
+    "cve": "CUSTOM",
+    "severity": "CRITICAL",
+    "type": "SQL Injection",
+    "description": "User input 'accountName' is directly concatenated into SQL query without sanitization. Vulnerable to SQL injection attacks.",
+    "safe_to_auto_fix": true
+  },
+  {
+    "file": "target-repo/src/main/java/org/owasp/webgoat/lessons/sqlinjection/advanced/SqlInjectionChallenge.java",
+    "line": 55,
+    "cve": "CUSTOM",
+    "severity": "CRITICAL",
+    "type": "SQL Injection",
+    "description": "User input 'username' is directly concatenated into SQL query without sanitization. Vulnerable to SQL injection attacks.",
+    "safe_to_auto_fix": true
+  },
+  {
+    "file": "target-repo/src/main/java/org/owasp/webgoat/lessons/jwt/claimmisuse/JWTHeaderKIDEndpoint.java",
+    "line": 76,
+    "cve": "CUSTOM",
+    "severity": "CRITICAL",
+    "type": "SQL Injection",
+    "description": "JWT header 'kid' parameter is directly concatenated into SQL query without sanitization. Vulnerable to SQL injection attacks.",
+    "safe_to_auto_fix": true
+  },
+  {
+    "file": "target-repo/src/main/java/org/owasp/webgoat/container/users/UserService.java",
+    "line": 53,
+    "cve": "CUSTOM",
+    "severity": "CRITICAL",
+    "type": "SQL Injection",
+    "description": "Username is directly concatenated into SQL CREATE SCHEMA statement without sanitization. Vulnerable to SQL injection attacks.",
+    "safe_to_auto_fix": true
+  },
+  {
+    "file": "target-repo/src/main/java/org/owasp/webgoat/lessons/challenges/challenge5/Assignment5.java",
+    "line": 45,
+    "cve": "CUSTOM",
+    "severity": "CRITICAL",
+    "type": "SQL Injection",
+    "description": "User inputs 'username_login' and 'password_login' are concatenated into PreparedStatement query string instead of using parameterized queries. Vulnerable to SQL injection.",
+    "safe_to_auto_fix": true
+  },
+  {
+    "file": "target-repo/src/main/java/org/owasp/webgoat/lessons/xss/CrossSiteScriptingLesson5a.java",
+    "line": 65,
+    "cve": "CUSTOM",
+    "severity": "HIGH",
+    "type": "Cross-Site Scripting (XSS)",
+    "description": "User input 'field1' is directly appended to HTML output without sanitization. Vulnerable to reflected XSS attacks.",
+    "safe_to_auto_fix": true
+  },
+  {
+    "file": "target-repo/src/main/java/org/owasp/webgoat/lessons/xss/stored/StoredXssComments.java",
+    "line": 83,
+    "cve": "CUSTOM",
+    "severity": "HIGH",
+    "type": "Cross-Site Scripting (XSS)",
+    "description": "User comment text is stored without sanitization and later displayed. Vulnerable to stored XSS attacks.",
+    "safe_to_auto_fix": true
+  },
+  {
+    "file": "target-repo/pom.xml",
+    "line": 70,
+    "cve": "CVE-2015-6420",
+    "severity": "CRITICAL",
+    "type": "Vulnerable Dependency",
+    "description": "commons-collections 3.2.1 is vulnerable to remote code execution via deserialization attacks. Should upgrade to 3.2.2 or higher.",
+    "safe_to_auto_fix": true
+  },
+  {
+    "file": "target-repo/pom.xml",
+    "line": 108,
+    "cve": "CVE-2021-29505",
+    "severity": "HIGH",
+    "type": "Vulnerable Dependency",
+    "description": "XStream 1.4.5 has multiple known vulnerabilities including remote code execution. Should upgrade to 1.4.18 or higher.",
+    "safe_to_auto_fix": true
+  }
+]

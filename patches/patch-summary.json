@@ -1,0 +1,101 @@
+{
+  "patch_summary": [
+    {
+      "cve": "CVE-2015-6420",
+      "file_changed": "target-repo/pom.xml",
+      "lines_changed": 1,
+      "timestamp": "2026-05-18T12:32:10Z",
+      "status": "FIXED",
+      "description": "Updated commons-collections from 3.2.1 to 3.2.2 to fix remote code execution vulnerability"
+    },
+    {
+      "cve": "CUSTOM-SQL-007",
+      "file_changed": "target-repo/src/main/java/org/owasp/webgoat/lessons/challenges/challenge5/Assignment5.java",
+      "lines_changed": 5,
+      "timestamp": "2026-05-18T12:32:32Z",
+      "status": "FIXED",
+      "description": "Replaced string concatenation with parameterized PreparedStatement to prevent SQL injection in challenge authentication"
+    },
+    {
+      "cve": "CUSTOM-SQL-001",
+      "file_changed": "target-repo/src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson5a.java",
+      "lines_changed": 6,
+      "timestamp": "2026-05-18T12:32:51Z",
+      "status": "FIXED",
+      "description": "Replaced string concatenation with parameterized PreparedStatement to prevent SQL injection in user data query"
+    },
+    {
+      "cve": "CUSTOM-SQL-003",
+      "file_changed": "target-repo/src/main/java/org/owasp/webgoat/lessons/sqlinjection/advanced/SqlInjectionLesson6a.java",
+      "lines_changed": 12,
+      "timestamp": "2026-05-18T12:33:19Z",
+      "status": "FIXED",
+      "description": "Replaced string concatenation with parameterized PreparedStatement and refactored executeSqlInjection method to prevent SQL injection"
+    },
+    {
+      "cve": "CUSTOM-SQL-004",
+      "file_changed": "target-repo/src/main/java/org/owasp/webgoat/lessons/sqlinjection/advanced/SqlInjectionChallenge.java",
+      "lines_changed": 4,
+      "timestamp": "2026-05-18T12:33:39Z",
+      "status": "FIXED",
+      "description": "Replaced string concatenation with parameterized PreparedStatement to prevent SQL injection in user registration check"
+    },
+    {
+      "cve": "CUSTOM-SQL-006",
+      "file_changed": "target-repo/src/main/java/org/owasp/webgoat/container/users/UserService.java",
+      "lines_changed": 1,
+      "timestamp": "2026-05-18T12:34:01Z",
+      "status": "SKIPPED",
+      "description": "SQL injection in schema creation - requires human review due to impact on core authentication system (affects 4 files)"
+    },
+    {
+      "cve": "CUSTOM-SQL-005",
+      "file_changed": "target-repo/src/main/java/org/owasp/webgoat/lessons/jwt/claimmisuse/JWTHeaderKIDEndpoint.java",
+      "lines_changed": 1,
+      "timestamp": "2026-05-18T12:34:15Z",
+      "status": "SKIPPED",
+      "description": "SQL injection in JWT key retrieval - requires human review due to authentication bypass risk"
+    },
+    {
+      "cve": "CUSTOM-SQL-002",
+      "file_changed": "target-repo/src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson8.java",
+      "lines_changed": 1,
+      "timestamp": "2026-05-18T12:34:32Z",
+      "status": "SKIPPED",
+      "description": "SQL injection in employee query - requires human review due to dependency on SqlInjectionLesson9"
+    },
+    {
+      "cve": "CUSTOM-XSS-002",
+      "file_changed": "target-repo/src/main/java/org/owasp/webgoat/lessons/xss/stored/StoredXssComments.java",
+      "lines_changed": 1,
+      "timestamp": "2026-05-18T12:34:46Z",
+      "status": "SKIPPED",
+      "description": "Stored XSS in comments - requires human review due to impact on all users and 2 dependent files"
+    },
+    {
+      "cve": "CUSTOM-XSS-001",
+      "file_changed": "target-repo/src/main/java/org/owasp/webgoat/lessons/xss/CrossSiteScriptingLesson5a.java",
+      "lines_changed": 1,
+      "timestamp": "2026-05-18T12:35:00Z",
+      "status": "SKIPPED",
+      "description": "Reflected XSS in payment context - requires human review due to sensitive credit card data handling"
+    },
+    {
+      "cve": "CVE-2021-29505",
+      "file_changed": "target-repo/pom.xml",
+      "lines_changed": 1,
+      "timestamp": "2026-05-18T12:35:13Z",
+      "status": "SKIPPED",
+      "description": "XStream deserialization vulnerability - intentionally vulnerable for educational purposes, requires human review"
+    }
+  ],
+  "summary": {
+    "total_vulnerabilities": 11,
+    "fixed": 5,
+    "skipped_human_review": 5,
+    "skipped_do_not_fix": 1,
+    "total_files_modified": 11,
+    "total_lines_changed": 34,
+    "completion_time": "2026-05-18T12:35:13Z"
+  }
+}
